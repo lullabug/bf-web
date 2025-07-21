@@ -3,20 +3,40 @@ import axios from 'axios'
 import {
     NConfigProvider,
     NInput,
+    NAutoComplete,
     NCard,
     NFlex,
     NButton,
     type GlobalThemeOverrides,
     type FormValidationStatus,
 } from 'naive-ui'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import z from 'zod'
 
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const invitationCode = ref('')
+
+const emailSuggestions = computed(() => {
+    return ['@gmail.com', '@qq.com', '@outlook.com', '@163.com', '@bandoriee-fans.com'].map(
+        (suffix) => {
+            const prefix = email.value.split('@')[0]
+            return {
+                label: prefix + suffix,
+                value: prefix + suffix,
+            }
+        },
+    )
+})
+
+const emailStatus = computed<FormValidationStatus>(() => {
+    if (!email.value) return 'success'
+    const rs = z.email().safeParse(email.value)
+    return rs.success ? 'success' : 'warning'
+})
 
 const themeOverride: GlobalThemeOverrides = {
     Input: {
@@ -42,30 +62,37 @@ const themeOverride: GlobalThemeOverrides = {
     Card: {
         color: 'rgb(from var(--color-background-soft) r g b / 0.5)',
     },
+    AutoComplete: {
+        peers: {
+            InternalSelectMenu: {
+                color: 'var(--color-background-soft)',
+                optionColorPending: '#34495e',
+                optionTextColor: 'var(--color-text)',
+            },
+        },
+    },
 }
 
-const passwordInputStatus = ref<FormValidationStatus>('success')
-const confirmPasswordInputStatus = ref<FormValidationStatus>('success')
-
-const errorMessage = ref<string | null>(null)
-
-watch([password, confirmPassword], ([password, confirm]) => {
-    if (password.length >= 8) {
-        passwordInputStatus.value = 'success'
-        if (confirm === password) {
-            confirmPasswordInputStatus.value = 'success'
-            errorMessage.value = null
-        } else {
-            confirmPasswordInputStatus.value = 'warning'
-            errorMessage.value = 'Confirm password does not match.'
-        }
-    } else {
-        passwordInputStatus.value = 'warning'
-        errorMessage.value = 'Password must be at least 8 characters long.'
+const passwordInputStatus = computed<FormValidationStatus>(() => {
+    if (password.value.length == 0 || password.value.length >= 8) {
+        return 'success'
     }
+    return 'warning'
+})
+
+const confirmPasswordInputStatus = computed<FormValidationStatus>(() => {
+    if (confirmPassword.value.length == 0) {
+        return 'success'
+    }
+    if (confirmPassword.value === password.value) {
+        return 'success'
+    }
+    return 'warning'
 })
 
 const router = useRouter()
+
+const apiError = ref<string | null>(null)
 
 async function handleSignUp() {
     try {
@@ -79,30 +106,71 @@ async function handleSignUp() {
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
             if (error.response.status === 409) {
-                errorMessage.value = 'Email or username already exists.'
+                apiError.value = 'Email or username already exists.'
             } else if (error.response.status === 400) {
-                errorMessage.value = 'Invitation code is invalid.'
+                apiError.value = 'Invitation code is invalid.'
             } else if (error.response.status === 500) {
-                errorMessage.value = 'Internal server error. Please try again later.'
+                apiError.value = 'Internal server error. Please try again later.'
             } else {
-                errorMessage.value =
-                    error.response.data.message || 'An error occurred during sign up.'
+                apiError.value = error.response.data.message || 'An error occurred during sign up.'
             }
         } else {
-            errorMessage.value = 'An unexpected error occurred.'
+            apiError.value = 'An unexpected error occurred.'
         }
     }
 }
 
-const signUpDisabled = ref(true)
-watch([name, email, password, confirmPassword], () => {
-    signUpDisabled.value =
+const signUpDisabled = computed(() => {
+    return (
         !name.value ||
         !email.value ||
+        emailStatus.value !== 'success' ||
         !password.value ||
         !confirmPassword.value ||
-        password.value !== confirmPassword.value ||
-        passwordInputStatus.value === 'warning'
+        passwordInputStatus.value !== 'success' ||
+        confirmPasswordInputStatus.value !== 'success' ||
+        invitationCode.value.trim() === ''
+    )
+})
+
+const validationError = computed(() => {
+    if (name.value) {
+        if (name.value.length < 3 || name.value.length > 20) {
+            return 'Name must be between 3 and 20 characters long.'
+        }
+        if (!allowUsernameChar(name.value)) {
+            return 'Name can only contain lowercase letters, numbers, and underscores.'
+        }
+    }
+    if (email.value && emailStatus.value !== 'success') {
+        return 'Email is not valid.'
+    }
+    if (password.value && passwordInputStatus.value === 'warning') {
+        return 'Password must be at least 8 characters long.'
+    }
+    if (confirmPassword.value && confirmPasswordInputStatus.value === 'warning') {
+        return 'Confirm password does not match.'
+    }
+    return null
+})
+
+const displayError = computed(() => {
+    return apiError.value || validationError.value
+})
+
+function allowUsernameChar(s: string) {
+    if (s === '') return true
+    return /^[a-z0-9_]*$/.test(s)
+}
+
+const nameStatus = computed(() => {
+    if (
+        name.value &&
+        (!allowUsernameChar(name.value) || name.value.length < 3 || name.value.length > 20)
+    ) {
+        return 'warning'
+    }
+    return 'success'
 })
 </script>
 
@@ -111,8 +179,24 @@ watch([name, email, password, confirmPassword], () => {
         <n-card class="login-card">
             <n-flex vertical align="center">
                 <img src="../assets/logo.webp" alt="Logo" class="logo" />
-                <n-input placeholder="Name" class="custom-input" v-model:value="name" />
-                <n-input placeholder="Email" class="custom-input" v-model:value="email" />
+                <n-input
+                    placeholder="Name"
+                    class="custom-input"
+                    v-model:value="name"
+                    :allow-input="allowUsernameChar"
+                    :status="nameStatus"
+                />
+                <n-auto-complete
+                    v-model:value="email"
+                    :input-props="{
+                        autocomplete: 'disabled',
+                    }"
+                    :options="emailSuggestions"
+                    class="custom-input"
+                    placeholder="Email"
+                    clearable
+                    :status="emailStatus"
+                />
                 <n-input
                     type="password"
                     placeholder="Password"
@@ -142,8 +226,8 @@ watch([name, email, password, confirmPassword], () => {
                 >
                     Sign Up
                 </n-button>
-                <div :v-if="errorMessage">
-                    <p class="error-message">{{ errorMessage }}</p>
+                <div v-if="displayError">
+                    <p class="error-message">{{ displayError }}</p>
                 </div>
             </n-flex>
         </n-card>
