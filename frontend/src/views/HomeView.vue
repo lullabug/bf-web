@@ -1,12 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { NFlex } from 'naive-ui'
+</script>
 
-<template><img src="../assets/logo.webp" class="home-logo" /></template>
+<template>
+    <n-flex vertical>
+        <h1>HOME PAGE</h1>
+    </n-flex>
+</template>
 
-<style scoped>
-.home-logo {
-    width: 50%;
-    max-width: 30rem;
-    height: auto;
-    margin: 1rem auto;
-}
-</style>
+<style scoped></style>
