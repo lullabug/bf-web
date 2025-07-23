@@ -173,3 +173,5 @@ dist
 
 wrangler.jsonc
 wrangler.toml
+
+upload.sql

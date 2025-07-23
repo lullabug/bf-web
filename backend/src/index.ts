@@ -25,8 +25,14 @@ import {
 	userVerificationSchema,
 	verifyUser,
 } from './users'
-import { clearExpiredSessions, createSession, deleteSession, getUserIdFromSession } from './sessions'
+import {
+	clearExpiredSessions,
+	createSession,
+	deleteSession,
+	getUserIdFromSession,
+} from './sessions'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
+import { getEvents } from './events'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -60,13 +66,7 @@ app.get('/api/user/logout', async (c) => {
 app.post('/api/user/register', zValidator('json', userRegisterationSchema), async (c) => {
 	const data = c.req.valid('json')
 	try {
-		await createUser(
-			data.name,
-			data.email,
-			data.password,
-			data.invitationCode,
-			c.env
-		)
+		await createUser(data.name, data.email, data.password, data.invitationCode, c.env)
 	} catch (error) {
 		console.error('User registration error:', error)
 		if (error instanceof UserExistsError) {
@@ -124,6 +124,27 @@ app.get('/api/user/info', async (c) => {
 	}
 })
 
+app.get('/api/events/:series', async (c) => {
+	const series = c.req.param('series')
+	const defaultNum = parseInt(c.env.EVENTS_GET_NUM_DEFAULT) || 100
+	const queryNum = c.req.query('num')
+	let num = queryNum ? parseInt(queryNum) : defaultNum
+
+	if (isNaN(num) || num <= 0) {
+		num = defaultNum
+	}
+	if (num > defaultNum) {
+		num = defaultNum
+	}
+
+	try {
+		const rs = await getEvents(num, series, c.env)
+		return c.json({ status: 'success', events: rs }, 200)
+	} catch (error) {
+		console.error('Error fetching events:', error)
+		return c.json({ status: 'error', message: 'Internal server error' }, 500)
+	}
+})
 
 // Catch-all route to proxy requests to the frontend
 app.all('*', async (c) => {
@@ -131,8 +152,8 @@ app.all('*', async (c) => {
 	if (!frontendUrl) {
 		return c.json({ status: 'error', message: 'Internal server error' }, 500)
 	}
-	const url = new URL(c.req.url);
-	const targetUrl = new URL(url.pathname + url.search, frontendUrl);
+	const url = new URL(c.req.url)
+	const targetUrl = new URL(url.pathname + url.search, frontendUrl)
 	return await fetch(new Request(targetUrl, c.req.raw))
 })
 

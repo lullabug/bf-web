@@ -8,9 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@vicons/material':
+        specifier: ^0.13.0
+        version: 0.13.0
       axios:
         specifier: ^1.10.0
         version: 1.10.0
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       naive-ui:
         specifier: ^2.42.0
         version: 2.42.0(vue@3.5.17(typescript@5.8.3))
@@ -755,6 +761,9 @@ packages:
     resolution: {integrity: sha512-YzfhzcTnZVPiLfP/oeKtDp2evwvHLMe0LOy7oe+hb9KKIumLNohYS9Hgp1ifwpu42YWxhZE8yieggz6JpqO/1w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@vicons/material@0.13.0':
+    resolution: {integrity: sha512-lKVxFNprM+CaBkUH3gt6VjIeiMsKQl2zARQMwTCZruQl2vRHzyeZiKeCflWS99CEfv2JzX/6y697smxlzyxcVw==}
+
   '@vitejs/plugin-vue@6.0.0':
     resolution: {integrity: sha512-iAliE72WsdhjzTOp2DtvKThq1VBC4REhwRcaA+zPAAph6I+OQhUXv+Xu2KS7ElxYtb7Zc/3R30Hwv1DxEo7NXQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1088,6 +1097,9 @@ packages:
 
   date-fns@3.6.0:
     resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
+
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
   de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
@@ -2910,6 +2922,8 @@ snapshots:
       '@typescript-eslint/types': 8.37.0
       eslint-visitor-keys: 4.2.1
 
+  '@vicons/material@0.13.0': {}
+
   '@vitejs/plugin-vue@6.0.0(vite@7.0.5(@types/node@22.16.4)(jiti@2.4.2))(vue@3.5.17(typescript@5.8.3))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.19
@@ -3303,6 +3317,8 @@ snapshots:
       date-fns: 3.6.0
 
   date-fns@3.6.0: {}
+
+  date-fns@4.1.0: {}
 
   de-indent@1.0.2: {}
 

@@ -1,46 +1,11 @@
 <script setup lang="ts">
 import axios from 'axios'
-import {
-    NConfigProvider,
-    NInput,
-    NCard,
-    NFlex,
-    NButton,
-    type GlobalThemeOverrides,
-    type FormValidationStatus,
-    c,
-} from 'naive-ui'
+import { NInput, NCard, NFlex, NButton, type FormValidationStatus, c } from 'naive-ui'
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const nameOrEmail = ref('')
 const password = ref('')
-
-const themeOverride: GlobalThemeOverrides = {
-    Input: {
-        textColor: 'var(--color-heading)',
-        color: 'var(--color-background-soft)',
-        colorFocus: 'var(--color-background-soft)',
-        border: '1px solid var(--color-border)',
-        borderHover: '1px solid var(--color-border-hover)',
-        borderFocus: '1px solid var(--color-heading)',
-        placeholderColor: 'var(--color-text)',
-        caretColor: 'var(--color-heading)',
-        colorFocusWarning: 'var(--color-background-soft)',
-        colorFocusError: 'var(--color-background-soft)',
-    },
-    Button: {
-        color: 'var(--color-background-soft)',
-        textColor: 'var(--color-text)',
-        textColorHover: 'var(--color-heading)',
-        border: '1px solid var(--color-border)',
-        borderHover: '1px solid var(--color-border-hover)',
-        borderFocus: '1px solid var(--color-heading)',
-    },
-    Card: {
-        color: 'rgb(from var(--color-background-soft) r g b / 0.5)',
-    },
-}
 
 const passwordInputStatus = ref<FormValidationStatus>('success')
 
@@ -71,7 +36,7 @@ const router = useRouter()
 
 async function handleLogin() {
     try {
-        const response = await axios.post('/api/user/verify', {
+        await axios.post('/api/user/verify', {
             nameOrEmail: nameOrEmail.value,
             password: password.value,
         })
@@ -97,40 +62,32 @@ function handleSignUp() {
 </script>
 
 <template>
-    <n-config-provider :theme-overrides="themeOverride">
-        <n-card class="login-card">
-            <n-flex vertical align="center">
-                <img src="../assets/logo.webp" alt="Logo" class="logo" />
-                <n-input
-                    placeholder="Name/Email"
-                    class="custom-input"
-                    v-model:value="nameOrEmail"
-                />
-                <n-input
-                    type="password"
-                    placeholder="Password"
-                    show-password-on="click"
-                    class="custom-input"
-                    v-model:value="password"
-                    :status="passwordInputStatus"
-                />
-                <n-button
-                    type="primary"
-                    class="custom-button"
-                    @click="handleLogin"
-                    :disabled="loginButtonDisabled"
-                >
-                    Login
-                </n-button>
-                <n-button type="info" class="custom-button" @click="handleSignUp">
-                    Sign up
-                </n-button>
-                <div :v-if="errorMessage">
-                    <p class="error-message">{{ errorMessage }}</p>
-                </div>
-            </n-flex>
-        </n-card>
-    </n-config-provider>
+    <n-card class="login-card">
+        <n-flex vertical align="center">
+            <img src="../assets/logo.webp" alt="Logo" class="logo" />
+            <n-input placeholder="Name/Email" class="custom-input" v-model:value="nameOrEmail" />
+            <n-input
+                type="password"
+                placeholder="Password"
+                show-password-on="click"
+                class="custom-input"
+                v-model:value="password"
+                :status="passwordInputStatus"
+            />
+            <n-button
+                type="primary"
+                class="custom-button"
+                @click="handleLogin"
+                :disabled="loginButtonDisabled"
+            >
+                Login
+            </n-button>
+            <n-button type="info" class="custom-button" @click="handleSignUp"> Sign up </n-button>
+            <div :v-if="errorMessage">
+                <p class="error-message">{{ errorMessage }}</p>
+            </div>
+        </n-flex>
+    </n-card>
 </template>
 
 <style lang="css" scoped>

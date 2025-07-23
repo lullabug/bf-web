@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios'
-import {
-    NConfigProvider,
-    NInput,
-    NAutoComplete,
-    NCard,
-    NFlex,
-    NButton,
-    type GlobalThemeOverrides,
-    type FormValidationStatus,
-} from 'naive-ui'
-import { computed, ref, watch } from 'vue'
+import { NInput, NAutoComplete, NCard, NFlex, NButton, type FormValidationStatus } from 'naive-ui'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import z from 'zod'
 
@@ -37,41 +28,6 @@ const emailStatus = computed<FormValidationStatus>(() => {
     const rs = z.email().safeParse(email.value)
     return rs.success ? 'success' : 'warning'
 })
-
-const themeOverride: GlobalThemeOverrides = {
-    Input: {
-        textColor: 'var(--color-heading)',
-        color: 'var(--color-background-soft)',
-        colorFocus: 'var(--color-background-soft)',
-        border: '1px solid var(--color-border)',
-        borderHover: '1px solid var(--color-border-hover)',
-        borderFocus: '1px solid var(--color-heading)',
-        placeholderColor: 'var(--color-text)',
-        caretColor: 'var(--color-heading)',
-        colorFocusWarning: 'var(--color-background-soft)',
-        colorFocusError: 'var(--color-background-soft)',
-    },
-    Button: {
-        color: 'var(--color-background-soft)',
-        textColor: 'var(--color-text)',
-        textColorHover: 'var(--color-heading)',
-        border: '1px solid var(--color-border)',
-        borderHover: '1px solid var(--color-border-hover)',
-        borderFocus: '1px solid var(--color-heading)',
-    },
-    Card: {
-        color: 'rgb(from var(--color-background-soft) r g b / 0.5)',
-    },
-    AutoComplete: {
-        peers: {
-            InternalSelectMenu: {
-                color: 'var(--color-background-soft)',
-                optionColorPending: '#34495e',
-                optionTextColor: 'var(--color-text)',
-            },
-        },
-    },
-}
 
 const passwordInputStatus = computed<FormValidationStatus>(() => {
     if (password.value.length == 0 || password.value.length >= 8) {
@@ -175,63 +131,61 @@ const nameStatus = computed(() => {
 </script>
 
 <template>
-    <n-config-provider :theme-overrides="themeOverride">
-        <n-card class="login-card">
-            <n-flex vertical align="center">
-                <img src="../assets/logo.webp" alt="Logo" class="logo" />
-                <n-input
-                    placeholder="Name"
-                    class="custom-input"
-                    v-model:value="name"
-                    :allow-input="allowUsernameChar"
-                    :status="nameStatus"
-                />
-                <n-auto-complete
-                    v-model:value="email"
-                    :input-props="{
-                        autocomplete: 'disabled',
-                    }"
-                    :options="emailSuggestions"
-                    class="custom-input"
-                    placeholder="Email"
-                    clearable
-                    :status="emailStatus"
-                />
-                <n-input
-                    type="password"
-                    placeholder="Password"
-                    show-password-on="click"
-                    class="custom-input"
-                    v-model:value="password"
-                    :status="passwordInputStatus"
-                />
-                <n-input
-                    type="password"
-                    placeholder="Confirm Password"
-                    show-password-on="click"
-                    class="custom-input"
-                    v-model:value="confirmPassword"
-                    :status="confirmPasswordInputStatus"
-                />
-                <n-input
-                    placeholder="Invitation Code"
-                    class="custom-input"
-                    v-model:value="invitationCode"
-                />
-                <n-button
-                    class="custom-button"
-                    @click="handleSignUp"
-                    type="primary"
-                    :disabled="signUpDisabled"
-                >
-                    Sign Up
-                </n-button>
-                <div v-if="displayError">
-                    <p class="error-message">{{ displayError }}</p>
-                </div>
-            </n-flex>
-        </n-card>
-    </n-config-provider>
+    <n-card class="login-card">
+        <n-flex vertical align="center">
+            <img src="../assets/logo.webp" alt="Logo" class="logo" />
+            <n-input
+                placeholder="Name"
+                class="custom-input"
+                v-model:value="name"
+                :allow-input="allowUsernameChar"
+                :status="nameStatus"
+            />
+            <n-auto-complete
+                v-model:value="email"
+                :input-props="{
+                    autocomplete: 'disabled',
+                }"
+                :options="emailSuggestions"
+                class="custom-input"
+                placeholder="Email"
+                clearable
+                :status="emailStatus"
+            />
+            <n-input
+                type="password"
+                placeholder="Password"
+                show-password-on="click"
+                class="custom-input"
+                v-model:value="password"
+                :status="passwordInputStatus"
+            />
+            <n-input
+                type="password"
+                placeholder="Confirm Password"
+                show-password-on="click"
+                class="custom-input"
+                v-model:value="confirmPassword"
+                :status="confirmPasswordInputStatus"
+            />
+            <n-input
+                placeholder="Invitation Code"
+                class="custom-input"
+                v-model:value="invitationCode"
+            />
+            <n-button
+                class="custom-button"
+                @click="handleSignUp"
+                type="primary"
+                :disabled="signUpDisabled"
+            >
+                Sign Up
+            </n-button>
+            <div v-if="displayError">
+                <p class="error-message">{{ displayError }}</p>
+            </div>
+        </n-flex>
+    </n-card>
 </template>
 
 <style lang="css" scoped>

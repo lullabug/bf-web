@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import RecentEvents from '@/components/eventsPage/RecentEvents.vue'
 import { NFlex } from 'naive-ui'
 </script>
 
 <template>
     <n-flex vertical>
-        <h1>EVENT PAGE</h1>
+        <RecentEvents />
     </n-flex>
 </template>
 
