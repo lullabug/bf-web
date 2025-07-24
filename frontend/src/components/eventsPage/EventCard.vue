@@ -13,7 +13,7 @@ const router = useRouter()
 
 <template>
     <n-card class="event-card" hoverable @click="router.push(targetPath)">
-        ><n-flex vertical>
+        <n-flex vertical>
             <img :src="props.imgUrl" />
             <div class="event-card-title"><slot name="title"></slot></div> </n-flex
     ></n-card>
