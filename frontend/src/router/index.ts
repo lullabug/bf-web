@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import eventsRouter from './events'
 
 const router = createRouter({
     history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -14,11 +15,7 @@ const router = createRouter({
             name: 'about',
             component: () => import('../views/AboutView.vue'),
         },
-        {
-            path: '/events',
-            name: 'events',
-            component: () => import('../views/EventsView.vue'),
-        },
+        eventsRouter,
         {
             path: '/profile',
             name: 'profile',

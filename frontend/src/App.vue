@@ -34,11 +34,14 @@ const themeOverride: GlobalThemeOverrides = {
         borderColor: 'var(--color-border)',
         textColor: 'var(--color-text)',
         arrowColor: 'var(--color-heading)',
+        dividerColor: 'var(--color-border)',
     },
     Card: {
         color: 'var(--color-background-soft)',
         titleTextColor: 'var(--color-heading)',
         borderColor: 'var(--color-border)',
+        closeColorHover: 'var(--color-background-mute)',
+        textColor: 'var(--color-text)',
     },
     DataTable: {
         thColor: 'var(--color-background-soft)',
@@ -56,6 +59,9 @@ const themeOverride: GlobalThemeOverrides = {
     },
     Descriptions: {
         tdTextColor: 'var(--color-heading)',
+    },
+    Divider: {
+        color: 'var(--color-border)',
     },
     Input: {
         color: 'var(--color-background)',

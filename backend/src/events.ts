@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import z from 'zod'
 
 const seriesEnum = z.enum(['bandori', 'chika_idol'])
@@ -36,6 +37,15 @@ export async function getEvents(numberOfEvents: number, series: string, env: Env
 		}
 	}
 	return rs
+}
+
+export async function clearExpiredEvents(env: Env) {
+	const currentDate = format(new Date(), 'yyyy-MM-dd')
+	await env.D1_DB.prepare(
+		'DELETE FROM events WHERE event_date < ?'
+	)
+		.bind(currentDate)
+		.run()
 }
 
 // TODO: Use KV to cache events

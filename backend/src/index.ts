@@ -32,7 +32,7 @@ import {
 	getUserIdFromSession,
 } from './sessions'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
-import { getEvents } from './events'
+import { clearExpiredEvents, getEvents } from './events'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -162,5 +162,6 @@ export default {
 
 	async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
 		clearExpiredSessions(env)
+		clearExpiredEvents(env)
 	},
 }
