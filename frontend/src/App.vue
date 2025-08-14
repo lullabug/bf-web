@@ -66,6 +66,7 @@ const themeOverride: GlobalThemeOverrides = {
     Input: {
         color: 'var(--color-background)',
         colorFocus: 'var(--color-background-mute)',
+        colorFocusWarning: 'var(--color-background-mute)',
         textColor: 'var(--color-heading)',
         border: '1px solid var(--color-border)',
     },
