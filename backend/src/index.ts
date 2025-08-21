@@ -33,6 +33,9 @@ import {
 } from './sessions'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { clearExpiredEvents, getEvents } from './events'
+import { EntropyPool } from './entropyPool'
+
+export { EntropyPool } from './entropyPool'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -64,9 +67,19 @@ app.get('/api/user/logout', async (c) => {
 })
 
 app.post('/api/user/register', zValidator('json', userRegisterationSchema), async (c) => {
+	const today = new Date()
+	const targetDate = new Date('2025-08-25T17:59:59+08:00')
+	if (today.getTime() >= targetDate.getTime()) {
+		return c.json({ status: 'error', message: 'Registration has closed.'}, 403)
+	}
+
 	const data = c.req.valid('json')
 	try {
 		await createUser(data.name, data.email, data.password, data.invitationCode, c.env)
+
+		const id: DurableObjectId = c.env.ENTROPY_POOL.idFromName('entropy-pool-20250809')
+		const entropyPool = c.env.ENTROPY_POOL.get(id) as DurableObjectStub<EntropyPool>
+		await entropyPool.updateState()
 	} catch (error) {
 		console.error('User registration error:', error)
 		if (error instanceof UserExistsError) {
@@ -143,6 +156,58 @@ app.get('/api/events/:series', async (c) => {
 	} catch (error) {
 		console.error('Error fetching events:', error)
 		return c.json({ status: 'error', message: 'Internal server error' }, 500)
+	}
+})
+
+app.get('/api/entropy-pool/:entropy_pool/entropy', async (c) => {
+	const poolName = c.req.param('entropy_pool')
+	const id: DurableObjectId = c.env.ENTROPY_POOL.idFromName(poolName)
+	const entropyPool = c.env.ENTROPY_POOL.get(id) as DurableObjectStub<EntropyPool>
+	const entropy = await entropyPool.getEntropy()
+	return c.json({ status: 'success', entropy: entropy }, 200)
+})
+
+app.get('/api/entropy-pool/:entropy_pool/result', async (c) => {
+	const today = new Date()
+	const targetDate = new Date('2025-08-25T18:00:00+08:00')
+	if (today.getTime() < targetDate.getTime()) {
+		return c.json({ status: 'error', message: 'Not yet available' }, 403)
+	}
+
+	const poolName = c.req.param('entropy_pool')
+	const keyName = poolName + '-result'
+	const rs = await c.env.KV_STORE.get(keyName, 'text')
+	if (rs) {
+		return c.json({ status: 'success', result: rs }, 200)
+	} else {
+		const d1 = c.env.D1_DB
+		const userCountStmt = d1.prepare('SELECT COUNT(*) as count FROM users')
+		const userCount = await userCountStmt
+			.bind()
+			.first<{ count: number }>()
+		if (!userCount) {
+			return c.json({ status: 'error', message: 'Internal server error' }, 500)
+		}
+		const userNum = userCount.count
+
+		const id: DurableObjectId = c.env.ENTROPY_POOL.idFromName(poolName)
+		const entropyPool = c.env.ENTROPY_POOL.get(id) as DurableObjectStub<EntropyPool>
+		const index = Number(await entropyPool.peekRandomInt(BigInt(userNum)))
+		const uidStmt = d1.prepare('SELECT id FROM users ORDER BY created_at LIMIT 1 OFFSET ?')
+		const userIdQuery = await uidStmt.bind(index).first<{ id: string }>()
+		if (!userIdQuery) {
+			return c.json({ status: 'error', message: 'User not found' }, 404)
+		}
+		const uid = userIdQuery.id
+
+		const invitationCodeStmt = d1.prepare('SELECT code FROM invitation_codes WHERE used_by = ?')
+		const invitationCodeQuery = await invitationCodeStmt.bind(uid).first<{ code: string }>()
+		if (!invitationCodeQuery) {
+			return c.json({ status: 'error', message: 'Invitation code not found' }, 404)
+		}
+		const code = invitationCodeQuery.code
+		await c.env.KV_STORE.put(keyName, code)
+		return c.json({ status: 'success', result: code }, 200)
 	}
 })
 
