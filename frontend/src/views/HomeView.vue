@@ -21,7 +21,7 @@ import {
 } from 'naive-ui'
 import { h, onMounted, ref } from 'vue'
 
-const countdownValue = new Date('2025-08-25T18:00:01+08:00').getTime() - new Date().getTime()
+const countdownValue = new Date('2025-08-31T18:00:01+08:00').getTime() - new Date().getTime()
 
 const isCountdownFinish = ref(false)
 const invitationCode = ref<string>('')

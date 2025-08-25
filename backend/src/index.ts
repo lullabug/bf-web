@@ -68,7 +68,7 @@ app.get('/api/user/logout', async (c) => {
 
 app.post('/api/user/register', zValidator('json', userRegisterationSchema), async (c) => {
 	const today = new Date()
-	const targetDate = new Date('2025-08-25T17:59:59+08:00')
+	const targetDate = new Date('2025-08-31T17:59:59+08:00')
 	if (today.getTime() >= targetDate.getTime()) {
 		return c.json({ status: 'error', message: 'Registration has closed.'}, 403)
 	}
@@ -169,7 +169,7 @@ app.get('/api/entropy-pool/:entropy_pool/entropy', async (c) => {
 
 app.get('/api/entropy-pool/:entropy_pool/result', async (c) => {
 	const today = new Date()
-	const targetDate = new Date('2025-08-25T18:00:00+08:00')
+	const targetDate = new Date('2025-08-31T18:00:00+08:00')
 	if (today.getTime() < targetDate.getTime()) {
 		return c.json({ status: 'error', message: 'Not yet available' }, 403)
 	}
